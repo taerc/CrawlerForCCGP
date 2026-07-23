@@ -69,7 +69,7 @@ def run():
     if crawler_cfg.get('fetch_detail', True):
         print("\n[2/4] 检索模块 - 抓取公告详情...")
         for i, item in enumerate(items, 1):
-            print(f"  [{i}/{len(items)}] 抓取详情: {item.title[:40]}")
+            print(f"  [{i}/{len(items)}] 抓取详情: {item.title}")
             item.detail_content = crawler.fetch_detail(item, config)
 
     # 4. 分析模块: LLM 分析
@@ -82,12 +82,12 @@ def run():
         analyzer = LLMAnalyzer()
         relevant_items = []
         for i, item in enumerate(items, 1):
-            print(f"  [{i}/{len(items)}] 分析: {item.title[:40]}")
+            print(f"  [{i}/{len(items)}] 分析: {item.title}")
             result = analyzer.analyze(item, config)
             item.analysis = result
             if result.related:
                 relevant_items.append(item)
-                print(f"    -> 相关! 领域: {result.category}, 理由: {result.reason[:50]}")
+                print(f"    -> 相关! 领域: {result.category}, 融合: {result.integration_level}, 理由: {result.reason}")
             time.sleep(1)  # 避免 API 限流
 
         print(f"分析完成，相关项目 {len(relevant_items)} 条")

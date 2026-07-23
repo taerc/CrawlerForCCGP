@@ -9,7 +9,7 @@ from src.models import TenderItem
 # Excel 表头(含分析列)
 EXCEL_HEADERS = [
     '序号', '名称', '日期', '招标人', '代理机构', '区域',
-    '关联领域', '分析理由', '详情链接', '项目概况'
+    '关联领域', '匹配关键词', '融合级别', '分析理由', '详情链接', '项目概况'
 ]
 
 
@@ -17,8 +17,11 @@ def items_to_rows(items: list[TenderItem]) -> list[list]:
     """将 TenderItem 列表转为行数据"""
     rows = []
     for i, item in enumerate(items, 1):
-        category = item.analysis.category if item.analysis else ""
-        reason = item.analysis.reason if item.analysis else ""
+        analysis = item.analysis
+        category = analysis.category if analysis else ""
+        reason = analysis.reason if analysis else ""
+        matched_keywords = '、'.join(analysis.matched_keywords) if analysis else ""
+        integration_level = analysis.integration_level if analysis else ""
         rows.append([
             i,
             item.title,
@@ -27,6 +30,8 @@ def items_to_rows(items: list[TenderItem]) -> list[list]:
             item.agent,
             item.region,
             category,
+            matched_keywords,
+            integration_level,
             reason,
             item.detail_url,
             item.summary,

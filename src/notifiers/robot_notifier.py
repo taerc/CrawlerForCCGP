@@ -46,11 +46,11 @@ class RobotNotifier(BaseNotifier):
         lines = [f"### 招标公告分析报告（共 {len(items)} 条）\n"]
 
         for i, item in enumerate(items, 1):
-            category = item.analysis.category if item.analysis else ""
-            reason = item.analysis.reason if item.analysis else ""
-            # 理由过长则截断，保持消息简洁
-            if reason and len(reason) > 40:
-                reason = reason[:40] + "..."
+            analysis = item.analysis
+            category = analysis.category if analysis else ""
+            reason = analysis.reason if analysis else ""
+            matched_keywords = '、'.join(analysis.matched_keywords) if analysis else ""
+            integration_level = analysis.integration_level if analysis else ""
 
             # 标题作为可点击的链接
             lines.append(f"**{i}. [{item.title}]({item.detail_url})**")
@@ -68,6 +68,10 @@ class RobotNotifier(BaseNotifier):
             detail = []
             if category:
                 detail.append(f"领域: {category}")
+            if matched_keywords:
+                detail.append(f"关键词: {matched_keywords}")
+            if integration_level:
+                detail.append(f"融合: {integration_level}")
             if reason:
                 detail.append(f"理由: {reason}")
             if detail:

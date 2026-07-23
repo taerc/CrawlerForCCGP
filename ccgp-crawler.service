@@ -1,0 +1,12 @@
+[Unit]
+Description=CCGP 招标公告分析推送系统
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/wangfm/wkspace/git/CrawlerForCCGP
+Environment=PATH=/home/wangfm/anaconda3/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/wangfm/anaconda3/bin/python3 main.py
+StandardOutput=journal
+StandardError=journal

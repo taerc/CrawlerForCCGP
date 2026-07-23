@@ -56,8 +56,11 @@ class EmailNotifier(BaseNotifier):
         # 构建表格数据
         table_data = []
         for i, item in enumerate(items, 1):
-            category = item.analysis.category if item.analysis else ""
-            reason = item.analysis.reason if item.analysis else ""
+            analysis = item.analysis
+            category = analysis.category if analysis else ""
+            reason = analysis.reason if analysis else ""
+            matched_keywords = '、'.join(analysis.matched_keywords) if analysis else ""
+            integration_level = analysis.integration_level if analysis else ""
             table_data.append([
                 i,                # 序号
                 item.title,       # 名称
@@ -66,12 +69,14 @@ class EmailNotifier(BaseNotifier):
                 item.agent,       # 代理机构
                 item.region,      # 区域
                 category,         # 关联领域
+                matched_keywords, # 匹配关键词
+                integration_level,# 融合级别
                 reason,           # 分析理由
                 f'<a href="{item.detail_url}">查看详情</a>',  # 详情链接
                 item.summary,     # 项目概况
             ])
 
-        columns = ['序号', '名称', '日期', '招标人', '代理机构', '区域', '关联领域', '分析理由', '详情', '项目概况']
+        columns = ['序号', '名称', '日期', '招标人', '代理机构', '区域', '关联领域', '匹配关键词', '融合级别', '分析理由', '详情', '项目概况']
         df = pd.DataFrame(table_data, columns=columns)
         html_table = df.to_html(index=False, border=0, classes="data-table", escape=False)
 

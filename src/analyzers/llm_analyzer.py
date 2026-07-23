@@ -160,9 +160,14 @@ class LLMAnalyzer(BaseAnalyzer):
     @staticmethod
     def _build_result(data: dict) -> AnalysisResult:
         """从解析后的字典构建 AnalysisResult"""
+        matched_keywords = data.get('matched_keywords', [])
+        if not isinstance(matched_keywords, list):
+            matched_keywords = []
         return AnalysisResult(
             related=bool(data.get('related', False)),
             category=str(data.get('category', '')),
             reason=str(data.get('reason', '')),
             confidence=float(data.get('confidence', 0.0)),
+            matched_keywords=matched_keywords,
+            integration_level=str(data.get('integration_level', '')),
         )

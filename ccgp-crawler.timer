@@ -1,0 +1,9 @@
+[Unit]
+Description=每天 10:00 执行 CCGP 招标公告爬取
+
+[Timer]
+OnCalendar=*-*-* 10:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

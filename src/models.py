@@ -27,3 +27,5 @@ class AnalysisResult:
     category: str = ""                # 匹配领域
     reason: str = ""                  # 判断理由
     confidence: float = 0.0           # 置信度
+    matched_keywords: list = field(default_factory=list)  # 匹配到的关键技术要素
+    integration_level: str = ""       # 技术融合程度 high/medium/low/none

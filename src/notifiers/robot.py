@@ -16,12 +16,14 @@ import requests
 
 
 class Robot:
-    def __init__(self, access_token: str, secret: str):
+    def __init__(self, access_token: str, secret: str = ""):
         """
         初始化钉钉机器人
-        :param access_token: 钉钉机器人的access_token
-        :param secret: 钉钉机器人的密钥
+        :param access_token: 钉钉机器人的access_token（必填）
+        :param secret: 钉钉机器人的密钥（可选，未启用加签时为空）
         """
+        if not access_token:
+            raise ValueError("access_token 不能为空")
         self.access_token = access_token
         self.secret = secret
 
@@ -31,6 +33,10 @@ class Robot:
         :return: 完整的webhook URL
         """
         webhook_url = f"https://oapi.dingtalk.com/robot/send?access_token={self.access_token}"
+        # 未配置加签密钥时，直接返回基础webhook URL
+        if not self.secret:
+            return webhook_url
+
         # 获取当前毫秒级时间戳
         timestamp = int(time.time() * 1000)
         string_to_sign = f"{timestamp}\n{self.secret}"

@@ -25,7 +25,43 @@ class CCGPCrawler(BaseCrawler):
     ]
 
     def search(self, config: dict) -> list[TenderItem]:
-        """抓取公告列表"""
+        """抓取公告列表(支持逗号分隔的多关键词分开检索后合并去重)"""
+        crawler_cfg = config.get('crawler', {})
+        kw_raw = crawler_cfg.get('kw', '')
+        keywords = [k.strip() for k in kw_raw.split(',') if k.strip()]
+
+        # 空关键词 = 全部，保持单次空检索的原行为
+        if not keywords:
+            keywords = ['']
+
+        all_items: list[TenderItem] = []
+        seen_keys: set = set()
+        multi = len(keywords) > 1
+
+        for idx, kw in enumerate(keywords, 1):
+            if multi:
+                print(f"\n--- 关键词 [{idx}/{len(keywords)}]: {kw or '(全部)'} ---")
+            items = self._search_single(kw, config)
+            for item in items:
+                # 批内去重: 以 detail_url 为主键，为空时回退到 title
+                key = item.detail_url or item.title
+                if key and key in seen_keys:
+                    continue
+                if key:
+                    seen_keys.add(key)
+                all_items.append(item)
+
+        # 合并后重排序号，保证连续
+        for i, item in enumerate(all_items, 1):
+            item.index = i
+
+        if multi:
+            print(f"\n多关键词合并去重完成，共 {len(all_items)} 条公告")
+
+        return all_items
+
+    def _search_single(self, kw: str, config: dict) -> list[TenderItem]:
+        """按单个关键词检索公告列表"""
         crawler_cfg = config.get('crawler', {})
         days_back = crawler_cfg.get('days_back', 7)
         max_pages = crawler_cfg.get('max_pages', 10)
@@ -44,7 +80,7 @@ class CCGPCrawler(BaseCrawler):
             'pinMu': 0,
             'bidType': crawler_cfg.get('bid_type', 1),  # 1=公开招标
             'dbselect': 'bidx',
-            'kw': crawler_cfg.get('kw', ''),
+            'kw': kw,
             'start_time': start_time,
             'end_time': end_time,
             'timeType': 6,
@@ -82,7 +118,7 @@ class CCGPCrawler(BaseCrawler):
                 item = self._parse_list_item(li, len(items))
                 if item:
                     items.append(item)
-                    print(f"  [{len(items)}] {item.title[:40]}")
+                    print(f"  [{len(items)}] {item.title}")
 
             # 翻页
             if curr_page < pages_to_crawl:
@@ -112,7 +148,7 @@ class CCGPCrawler(BaseCrawler):
                 return None
 
             link_href = title_el.get('href', '')
-            title = title_el.text.strip()
+            title = title_el.xpath('string()').strip()
 
             # 跳过已中标/成交的公告(已被别人中标,不再关注)
             if '中标' in title or '成交' in title:
