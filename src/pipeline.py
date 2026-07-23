@@ -1,5 +1,6 @@
 # -*- coding=utf-8 -*-
 """主流程编排: 检索 -> 分析 -> 推送"""
+import os
 import time
 import pandas as pd
 from datetime import datetime
@@ -9,16 +10,15 @@ from src.models import TenderItem
 from src.crawlers.ccgp_crawler import CCGPCrawler
 from src.analyzers.llm_analyzer import LLMAnalyzer
 from src.notifiers.email_notifier import EmailNotifier
+from src.notifiers.robot_notifier import RobotNotifier
 from src.utils.excel import save_excel
 
 
 def load_existing_data(file_path: str) -> pd.DataFrame | None:
     """加载已有的 Excel 数据"""
-    try:
-        return pd.read_excel(file_path)
-    except Exception as e:
-        print(f"读取历史数据文件失败: {e}")
+    if not os.path.exists(file_path):
         return None
+    return pd.read_excel(file_path)
 
 
 def get_existing_titles(df: pd.DataFrame | None) -> set:
@@ -92,11 +92,16 @@ def run():
 
         print(f"分析完成，相关项目 {len(relevant_items)} 条")
 
-    # 5. 推送模块: 邮件通知
+    # 5. 推送模块: 邮件 + 钉钉群通知
     if relevant_items:
         print("\n[4/4] 推送模块 - 发送邮件通知...")
         notifier = EmailNotifier()
         notifier.notify(relevant_items, config)
+
+        # 钉钉群通知 (与邮件内容一致，格式更精简)
+        print("\n推送模块 - 发送钉钉群通知...")
+        robot_notifier = RobotNotifier()
+        robot_notifier.notify(relevant_items, config)
 
         # 保存 Excel
         print("\n保存结果到 Excel...")

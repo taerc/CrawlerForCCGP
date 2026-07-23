@@ -3,15 +3,16 @@
 """
 钉钉机器人模块
 
-提供钉钉机器人消息发送功能，包括签名计算和Markdown消息发送。
+提供钉钉机器人消息发送功能，包括签名计算和 Markdown 消息推送。
 """
 
-import json
 import time
 import hmac
 import hashlib
 import base64
 from urllib.parse import quote_plus
+
+import requests
 
 
 class Robot:
@@ -33,22 +34,35 @@ class Robot:
         # 获取当前毫秒级时间戳
         timestamp = int(time.time() * 1000)
         string_to_sign = f"{timestamp}\n{self.secret}"
-        
+
         # 使用HMAC-SHA256计算签名
         hmac_code = hmac.new(
             self.secret.encode('utf-8'),
             string_to_sign.encode('utf-8'),
             digestmod=hashlib.sha256
         ).digest()
-        
+
         # Base64编码
         sign = base64.b64encode(hmac_code).decode('utf-8')
-        
+
         # URL编码签名
         sign_encoded = quote_plus(sign)
-        
+
         hook_url = f"{webhook_url}&timestamp={timestamp}&sign={sign_encoded}"
         return hook_url
+
+    def send(self, params: dict) -> dict:
+        """
+        发送消息到钉钉群
+        :param params: 钉钉消息体 (msgtype/markdown/at 等字段)
+        :return: 钉钉接口返回的 JSON 结果
+        """
+        hook_url = self.signature()
+        resp = requests.post(hook_url, json=params, timeout=10)
+        result = resp.json()
+        if result.get("errcode") != 0:
+            print(f"钉钉消息发送失败: {result}")
+        return result
 
     def send_markdown(
         self,
@@ -65,7 +79,7 @@ class Robot:
         :param at_mobiles: 需要@的用户手机号码列表
         :param at_userids: 需要@的用户id列表
         :param is_at_all: 是否需要@全体成员
-        :return: 请求参数字典
+        :return: 钉钉接口返回的 JSON 结果
         """
         params = {
             "msgtype": "markdown",
@@ -79,4 +93,4 @@ class Robot:
                 "isAtAll": is_at_all
             }
         }
-        return params
+        return self.send(params)

@@ -22,6 +22,11 @@ notifier:
   type: email
   email:
     subject: "[招标公告分析报告] 发现 {count} 条相关项目"
+  # 钉钉机器人推送 (access_token/secret 从 .env 读取)
+  dingtalk:
+    title: "[招标公告分析报告] 发现 {count} 条相关项目"
+    at_mobiles: []          # 需要@的手机号列表
+    is_at_all: false        # 是否@全体
 
 storage:
   history_file: "existing_data.xlsx"

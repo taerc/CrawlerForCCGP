@@ -46,5 +46,9 @@ def load_config(config_path: str = None) -> dict:
         "sender_password": os.environ.get("SENDER_PASSWORD", ""),
         "receiver_email": os.environ.get("RECEIVER_EMAIL", ""),
     }
+    config["dingtalk"] = {
+        "access_token": os.environ.get("DINGTALK_ACCESS_TOKEN", ""),
+        "secret": os.environ.get("DINGTALK_SECRET", ""),
+    }
 
     return config
