@@ -1,0 +1,27 @@
+# 招标公告分析推送系统配置
+
+crawler:
+  days_back: 1              # 抓取最近几天
+  max_pages: 50              # 最大页数 (测试: 改为1, 正式可改回10)
+  kw: "桥梁"                    # 搜索关键词(空=全部)
+  display_zone: ""
+  zone_id: ""
+  bid_type: 1                # 招标方式(0=全部, 1=公开招标, 2=邀请招标, 3=竞争性谈判, 4=单一来源, 5=询价, 6=竞争性磋商)
+  fetch_detail: true        # 是否抓取详情页内容
+  detail_max_length: 5000   # 详情内容截取最大字符数
+
+analyzer:
+  enabled: true
+  model:   deepseek-v4-flash                    # 模型名(通义千问: qwen-plus/qwen-turbo/qwen-max)
+  temperature: 0.1                      # 温度参数
+  max_tokens: 1000                      # 最大输出 token
+  # api_key 和 base_url 从 .env 读取 (LLM_API_KEY / LLM_BASE_URL)
+  prompt_file: "prompts/tender_analysis.md"   # 提示词与关键词的 Markdown 文件路径
+
+notifier:
+  type: email
+  email:
+    subject: "[招标公告分析报告] 发现 {count} 条相关项目"
+
+storage:
+  history_file: "existing_data.xlsx"

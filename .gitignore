@@ -1,0 +1,19 @@
+# 环境变量与密钥
+.env
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.trae/
+.idea/
+.vscode/
+
+# 输出文件
+filtered_data_*.xlsx
+existing_data.xlsx
+
+# 日志
+document_log.txt
